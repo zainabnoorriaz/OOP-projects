@@ -1,8 +1,17 @@
+import json
 class Student:
     def __init__(self, name, roll_no, section):
         self.name = name
         self.roll_no = roll_no
         self.section = section
+
+    def to_dict(self):
+        return {
+            "name" : self.name,
+            "roll_no" : self.roll_no,
+            "section" : self.section
+        }
+    
 
 class StudentManagement:
     def __init__ (self) :
@@ -16,8 +25,13 @@ class StudentManagement:
                  break
         else :
             self.students.append(student)
+            self.save_students()
 
     def display_students(self):
+
+        if not self.students:
+            print("No students found")
+            return
         for student in self.students:
             print(f"{student.name} | {student.roll_no} | {student.section}")
 
@@ -36,22 +50,47 @@ class StudentManagement:
                 new_section = input("Enter the new section of the student: ")
                 student.name = new_name
                 student.section = new_section
+                self.save_students()
                 print("Student updated successfully")
                 break
         else :
             print("Roll no does not exist")
+
               
 
     def remove_student(self, roll_no) :
         for student in self.students :
             if student.roll_no == roll_no:
                 self.students.remove(student)
+                self.save_students()
+                print("Student removed successfully!")
                 break
         else :
             print("Student not found")
+        
+
+       
+    def save_students(self):
+       data = []
+       for student in self.students:
+        data.append(student.to_dict())
+
+       with open("students.json", "w") as file:
+          json.dump(data, file)
+
+    def load_students(self) :
+       try:
+         with open("students.json", "r") as file:
+           data = json.load(file)
+
+         for item in data :
+          self.students.append(Student(item["name"], item["roll_no"], item["section"]))
+         
+       except FileNotFoundError:
+        pass
 
 management = StudentManagement()
-
+management.load_students()
 while True :
 
     print("1. Add Student")
